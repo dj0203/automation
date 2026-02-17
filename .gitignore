@@ -1,0 +1,8 @@
+*.tgz
+*.tar.xz
+*.tar
+.gitattributes
+
+# Ignore Containerlab runtime directories
+clab-*/
+.clab/

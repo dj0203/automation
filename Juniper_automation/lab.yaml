@@ -1,0 +1,12 @@
+name : crpd-lab
+topology: 
+  nodes:
+    r1: 
+      kind: juniper_crpd
+      image: crpd:23.4R1.9
+    r2:
+      kind: juniper_crpd
+      image: crpd:23.4R1.9 
+  links: 
+    - endpoints : ["r1:eth1" , "r2:eth1"]
+  

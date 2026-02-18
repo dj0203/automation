@@ -6,3 +6,11 @@
 # Ignore Containerlab runtime directories
 clab-*/
 .clab/
+# vrnetlab source (if you don't want to track the tool itself)
+vrnetlab/
+
+# vrnetlab build artifacts
+built-image-sha-*
+cidfile
+
+*.zip

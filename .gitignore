@@ -14,3 +14,4 @@ built-image-sha-*
 cidfile
 
 *.zip
+.env

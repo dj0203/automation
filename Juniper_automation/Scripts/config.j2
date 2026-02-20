@@ -1,0 +1,8 @@
+set interfaces lo0 unit 0 family inet address {{lo_ip}}
+set interfaces lo0 unit 0 family iso address {{iso_ip}}
+set protocols mpls interface {{intf}}
+set protocols ldp interface {{intf}}
+set protocols isis level 1 disable
+set protocols isis level 2 wide-metrics-only 
+set protocols isis interface {{intf}} point-to-point
+set protocols isis interface lo0.0 passive

@@ -1,0 +1,32 @@
+juniper_devices: ##key which will be used to load the inventory file in scripts 
+  - name : PE1
+    ip : 192.168.0.100
+    role: pe
+    junos: 21.4
+  
+  - name : P1
+    ip : 192.168.0.101
+    role : p
+    junos : 21.4
+  
+  - name : PE3 
+    ip : 192.168.0.102
+    role : pe
+    junos : 21.4 
+
+  - name : RR 
+    ip : 192.168.0.103 
+    role : rr
+    junos : 21.4 
+  
+  - name : CE1 
+    ip : 192.168.0.104 
+    role : ce
+    junos : 14.1
+  
+  - name : CE3
+    ip : 192.168.0.105
+    role : ce
+    junos : 14.1
+  
+

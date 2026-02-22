@@ -1,0 +1,14 @@
+name: modern-iol
+topology:
+  nodes:
+    r1:
+      kind: cisco_iol
+      image: vrnetlab/cisco_iol:17.16.01a
+      memory: 2G  # Increased for stable boot
+    sw1:
+      kind: cisco_iol
+      image: vrnetlab/cisco_iol:L2-17.16.01a
+      memory: 1G
+
+  links:
+    - endpoints: ["r1:e0/1", "sw1:e0/1"]

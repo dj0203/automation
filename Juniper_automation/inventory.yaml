@@ -3,21 +3,33 @@ juniper_devices: ##key which will be used to load the inventory file in scripts
     ip : 192.168.0.100
     role: pe
     junos: 21.4
+    interfaces: 
+      - ge-0/0/1
+      - ge-0/0/2
   
   - name : P1
     ip : 192.168.0.101
     role : p
     junos : 21.4
+    interfaces: 
+      - ge-0/0/0
+      - ge-0/0/1
+      - ge-0/0/2
   
   - name : PE3 
     ip : 192.168.0.102
     role : pe
     junos : 21.4 
+    interfaces : 
+      - ge-0/0/2
+      - ge-0/0/3
 
   - name : RR 
     ip : 192.168.0.103 
     role : rr
     junos : 21.4 
+    interfaces : 
+      - ge-0/0/0
   
   - name : CE1 
     ip : 192.168.0.104 

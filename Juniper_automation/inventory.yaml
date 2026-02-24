@@ -29,4 +29,32 @@ juniper_devices: ##key which will be used to load the inventory file in scripts
     role : ce
     junos : 14.1
   
+links:
+  - source: PE1
+    source_intf: ge-0/0/1
+    target: P1
+    target_intf: ge-0/0/1
+
+  - source: PE1
+    source_intf: ge-0/0/2
+    target: CE1
+    target_intf: ge-0/0/2
+
+  - source: P1
+    source_intf: ge-0/0/2
+    target: PE3
+    target_intf: ge-0/0/2
+
+  - source: P1
+    source_intf: ge-0/0/0
+    target: RR
+    target_intf: ge-0/0/0
+
+  - source: PE3
+    source_intf: ge-0/0/3
+    target: CE3
+    target_intf: ge-0/0/3
+  
+
+  
 

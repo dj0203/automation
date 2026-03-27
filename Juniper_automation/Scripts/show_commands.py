@@ -8,7 +8,7 @@ username = os.getenv("USERNAME")
 password = os.getenv("PASSWORD")
 
 # Load inventory file 
-with open("/home/deb/projects/automation/Juniper_automation/inventory.yaml") as f: 
+with open("/home/deb/automation/Juniper_automation/inventory.yaml") as f: 
     inventory = yaml.safe_load(f) #becomes a dictionary
 
 for devices in inventory["juniper_devices"] : #So `inventory["juniper_devices"]` gives the list of devices
@@ -21,6 +21,9 @@ for devices in inventory["juniper_devices"] : #So `inventory["juniper_devices"]`
         ldp_up = dev.cli("show ldp neighbor" ,warning =False)
         show_route = dev.cli("show route",warning = False)
         show_chassis = dev.cli("show chassis fpc" , warning = False)
+        show_ldp = dev.cli("show ldp neighbor" , warning = False)
+        show_ldp_interface = dev.cli("show ldp interface")
+        show_mpls_interface = dev.cli("show mpls interface", warning=False)
         print(output)
         print(version)
         print(isis_up)
@@ -28,3 +31,6 @@ for devices in inventory["juniper_devices"] : #So `inventory["juniper_devices"]`
         print(ldp_up)
         print(show_route)
         print(show_chassis)
+        print (show_ldp)
+        print (show_ldp_interface)
+        print(show_mpls_interface)

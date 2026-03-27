@@ -1,72 +1,64 @@
-juniper_devices: ##key which will be used to load the inventory file in scripts 
-  - name : PE1
-    ip : 192.168.0.100
+juniper_devices:
+  - name: PE1
+    ip: 192.168.0.151
     role: pe
-    junos: 21.4
-    interfaces: 
-      - ge-0/0/1
-      - ge-0/0/2
-  
-  - name : P1
-    ip : 192.168.0.101
-    role : p
-    junos : 21.4
-    interfaces: 
-      - ge-0/0/0
-      - ge-0/0/1
-      - ge-0/0/2
-  
-  - name : PE3 
-    ip : 192.168.0.102
-    role : pe
-    junos : 21.4 
-    interfaces : 
-      - ge-0/0/2
-      - ge-0/0/3
+  - name: PE2
+    ip: 192.168.0.155
+    role: pe
+  - name: P1
+    ip: 192.168.0.152
+    role: p
+  - name: P2
+    ip: 192.168.0.156
+    role: p
+  - name: RR1
+    ip: 192.168.0.154
+    role: rr
+  - name: RR2
+    ip: 192.168.0.158
+    role: rr
+  - name: PE3
+    ip: 192.168.0.153
+    role: pe
+  - name: PE4
+    ip: 192.168.0.157
+    role: pe
+  - name: CE1
+    ip: 192.168.0.159
+    role: ce
+  - name: CE2
+    ip: 192.168.0.160
+    role: ce
+  - name: CE3
+    ip: 192.168.0.161
+    role: ce
+  - name: CE4
+    ip: 192.168.0.162
+    role: ce
 
-  - name : RR 
-    ip : 192.168.0.103 
-    role : rr
-    junos : 21.4 
-    interfaces : 
-      - ge-0/0/0
-  
-  - name : CE1 
-    ip : 192.168.0.104 
-    role : ce
-    junos : 14.1
-  
-  - name : CE3
-    ip : 192.168.0.105
-    role : ce
-    junos : 14.1
-  
 links:
-  - source: PE1
-    source_intf: ge-0/0/1
-    target: P1
-    target_intf: ge-0/0/1
+  # --- Core ISP Links ---
+  - { source: PE1, source_intf: ge-0/0/1, target: P1, target_intf: ge-0/0/1 }
+  - { source: PE1, source_intf: ge-0/0/0, target: PE2, target_intf: ge-0/0/0 }
+  - { source: PE1, source_intf: ge-0/0/4, target: RR1, target_intf: ge-0/0/4 }
+  - { source: PE2, source_intf: ge-0/0/2, target: P2, target_intf: ge-0/0/2 }
+  - { source: PE2, source_intf: ge-0/0/5, target: RR1, target_intf: ge-0/0/5 }
+  - { source: P1, source_intf: ge-0/0/0, target: RR1, target_intf: ge-0/0/0 }
+  - { source: P1, source_intf: ge-0/0/3, target: RR2, target_intf: ge-0/0/3 }
+  - { source: P2, source_intf: ge-0/0/1, target: RR1, target_intf: ge-0/0/1 }
+  - { source: P2, source_intf: ge-0/0/0, target: RR2, target_intf: ge-0/0/0 }
+  - { source: PE3, source_intf: ge-0/0/2, target: P1, target_intf: ge-0/0/2 }
+  - { source: PE3, source_intf: ge-0/0/6, target: PE4, target_intf: ge-0/0/6 }
+  - { source: PE4, source_intf: ge-0/0/3, target: P2, target_intf: ge-0/0/3 }
+  - { source: PE4, source_intf: ge-0/0/5, target: RR2, target_intf: ge-0/0/5 }
+  - { source: PE3, source_intf: ge-0/0/4, target: RR2, target_intf: ge-0/0/4 }
 
-  - source: PE1
-    source_intf: ge-0/0/2
-    target: CE1
-    target_intf: ge-0/0/2
-
-  - source: P1
-    source_intf: ge-0/0/2
-    target: PE3
-    target_intf: ge-0/0/2
-
-  - source: P1
-    source_intf: ge-0/0/0
-    target: RR
-    target_intf: ge-0/0/0
-
-  - source: PE3
-    source_intf: ge-0/0/3
-    target: CE3
-    target_intf: ge-0/0/3
-  
-
-  
-
+  # --- Customer Edge (CE) Links ---
+  - { source: PE1, source_intf: ge-0/0/2, target: CE1, target_intf: ge-0/0/2 }
+  - { source: PE1, source_intf: ge-0/0/3, target: CE2, target_intf: ge-0/0/0 }
+  - { source: PE2, source_intf: ge-0/0/3, target: CE1, target_intf: ge-0/0/3 }
+  - { source: PE2, source_intf: ge-0/0/1, target: CE2, target_intf: ge-0/0/1 }
+  - { source: PE3, source_intf: ge-0/0/1, target: CE3, target_intf: ge-0/0/1 }
+  - { source: PE3, source_intf: ge-0/0/3, target: CE4, target_intf: ge-0/0/3 }
+  - { source: PE4, source_intf: ge-0/0/2, target: CE3, target_intf: ge-0/0/2 }
+  - { source: PE4, source_intf: ge-0/0/0, target: CE4, target_intf: ge-0/0/0 }

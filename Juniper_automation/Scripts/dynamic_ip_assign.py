@@ -1,66 +1,91 @@
+import os 
 import yaml
+import ipaddress 
+from dotenv import load_dotenv
 from jnpr.junos import Device
 from jnpr.junos.utils.config import Config
-from dotenv import load_dotenv
-import os
-import ipaddress
 
+# 1. Load credentials
 load_dotenv()
-username = os.getenv("USERNAME")
-password = os.getenv("PASSWORD")
+USERNAME = os.getenv("USERNAME")
+PASSWORD = os.getenv("PASSWORD")
 
-ce_subnets =list(ipaddress.ip_network("172.16.0.0/16").subnets(new_prefix=30))
-isp_subnets = list(ipaddress.ip_network("10.1.0.0/16").subnets(new_prefix=30))
+# 2. Define IP Pools as iterators
+# ISP Core uses /31, Customer Edge uses /30
+ISP_POOL = ipaddress.ip_network("10.1.0.0/16").subnets(new_prefix=31)
+CE_POOL = ipaddress.ip_network("172.16.0.0/16").subnets(new_prefix=30)
 
-ce_counter = 0
-isp_counter =0
-
-def connect(ip,username,password): 
-    return Device(host=ip,user = username , passwd = password)
-with open("/home/deb/projects/automation/Juniper_automation/inventory.yaml") as f:
+# 3. Load inventory (Adjust path if needed)
+with open("../inventory.yaml") as f: 
     inventory = yaml.safe_load(f)
 
-role_map={}
-ip_map = {}
-for device in inventory["juniper_devices"]:
-    role_map[device["name"]] = device["role"]
-    ip_map[device["name"]] = device["ip"]
+# 4. Create lookup table for roles and management IPs
+device_info = {
+    d["name"]: {"role": d["role"], "mgmt_ip": d["ip"]}
+    for d in inventory["juniper_devices"]
+}
 
+# 5. Initialize the configuration plan storage
+config_plan = {name: [] for name in device_info.keys()}
+isp_iter = iter(ISP_POOL)
+ce_iter = iter(CE_POOL)
+
+print(f"✅ Loaded {len(device_info)} devices. Calculating IP assignments...")
+
+# 6. Loop through links and assign IPs
 for link in inventory["links"]:
-    source_device = link["source"]
-    source_interface = link["source_intf"]
-    target_device = link["target"]
-    target_interface = link["target_intf"]
-    source_role = role_map[source_device]
-    target_role = role_map[target_device]
-    if source_role == "ce" or target_role == "ce":
-        subnet = ce_subnets[ce_counter]
-        ce_counter +=1
-    else:
-        subnet_type = "isp"
-        subnet = isp_subnets[isp_counter]
-        isp_counter +=1
+    src, tgt = link["source"], link["target"]
+    src_intf, tgt_intf = link["source_intf"], link["target_intf"]
+
+    # Logic: Use CE pool if either side is a 'ce' role
+    is_ce_link = (device_info[src]["role"] == "ce") or (device_info[tgt]["role"] == "ce")
+
+    if is_ce_link:
+        subnet = next(ce_iter)
+        mask = "30"
+        ips = list(subnet.hosts())
+    else: 
+        subnet = next(isp_iter)
+        mask = "31"
+        ips = [subnet[0], subnet[1]]
+
+    # Store data for both sides of the link
+    config_plan[src].append({"name": src_intf, "ip": f"{ips[0]}/{mask}"})
+    config_plan[tgt].append({"name": tgt_intf, "ip": f"{ips[1]}/{mask}"})
     
-    hosts = list(subnet.hosts())
-    source_ip = f"{hosts[0]}/30"
-    target_ip = f"{hosts[1]}/30"
+    print(f"  Mapped: {src} <-> {tgt} | {subnet}")
 
-    print (f"{source_device} {source_interface}:{source_ip}")
-    print (f"{target_device} {target_interface}:{target_ip}")
+# 7. Deployment Phase
+print("\n🚀 Starting Deployment to Routers...")
 
-    #Push the config on source interface
-    with connect(ip_map[source_device],username,password) as dev:
-        cu = Config(dev)
-        cu.load(template_path="/home/deb/projects/automation/Juniper_automation/Templates/interface_template.j2",template_vars={"intf": source_interface, "ip_address": source_ip},format="set")
-        cu.commit()
-        print(f"{source_device} configured")
-   #Push the config on target interface 
-    with connect(ip_map[target_device],username,password) as dev:
-        cu = Config(dev)
-        cu.load(template_path="/home/deb/projects/automation/Juniper_automation/Templates/interface_template.j2",template_vars={"intf": target_interface, "ip_address": target_ip},format="set")
-        cu.commit()
-        print(f"{target_device} configured")
-    
+for router, interfaces in config_plan.items():
+    if not interfaces:
+        continue
 
+    mgmt_ip = device_info[router]["mgmt_ip"]
+    print(f"Connecting to {router} ({mgmt_ip})...")
 
+    try:
+        with Device(host=mgmt_ip, user=USERNAME, passwd=PASSWORD) as dev:
+            cu = Config(dev)
+            
+            for intf_data in interfaces:
+                cu.load(
+                    template_path="../Templates/interface_template.j2",
+                    template_vars={
+                        "intf": intf_data["name"], 
+                        "ip_address": intf_data["ip"]
+                    },
+                    format="set"
+                )
 
+            if cu.diff():
+                print(f"  Pushing configuration changes to {router}...")
+                cu.commit(comment=f"Automated IP assignment via dj0203 script")
+            else:
+                print(f"  No changes needed for {router}.")
+
+    except Exception as e:
+        print(f"  ❌ Failed to configure {router}: {e}")
+
+print("\n✅ IP configuration complete.")

@@ -1,5 +1,6 @@
 set protocols mpls interface {{intf}}
 set protocols ldp interface {{intf}}
+set protocols ldp track-igp-metric
 set protocols isis level 1 disable
 set protocols isis level 2 wide-metrics-only
 set protocols isis interface {{intf}} point-to-point
